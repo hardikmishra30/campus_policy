@@ -28,7 +28,14 @@ app.use((req, res) => {
 // Central error handler
 app.use((err, req, res, next) => {
   console.error('[error]', err.message);
-  res.status(500).json({ error: 'Internal server error', details: err.message });
+  const isUploadValidationError = err.code === 'LIMIT_FILE_SIZE' || err.message === 'Only PDF files are allowed';
+  const statusCode = isUploadValidationError ? 400 : 500;
+  const error = isUploadValidationError
+    ? err.message === 'Only PDF files are allowed'
+      ? err.message
+      : 'File size must not exceed 25MB'
+    : 'Internal server error';
+  res.status(statusCode).json({ error, details: err.message });
 });
 
 const PORT = process.env.PORT || 5000;
