@@ -11,6 +11,7 @@ const documentSchema = new mongoose.Schema(
     filePath: { type: String, required: true }, // path passed to RAG service
     mimeType: { type: String, default: 'application/pdf' },
     size: { type: Number },
+    contentHash: { type: String, unique: true, sparse: true, index: true },
 
     status: {
       type: String,

@@ -1,5 +1,7 @@
 const express = require('express');
 const axios = require('axios');
+const crypto = require('crypto');
+const fs = require('fs/promises');
 const router = express.Router();
 const { upload } = require('../middleware/upload');
 const Document = require('../models/Document');
@@ -14,7 +16,18 @@ router.post('/', upload.single('file'), async (req, res) => {
 
     const { title, docType, year } = req.body;
     if (!title || !docType || !year) {
+      await removeUploadedFile(req.file.path);
       return res.status(400).json({ error: 'title, docType, and year are required' });
+    }
+
+    const contentHash = await hashFile(req.file.path);
+    const existingDocument = await Document.findOne({ contentHash });
+    if (existingDocument) {
+      await removeUploadedFile(req.file.path);
+      return res.status(409).json({
+        error: 'This document has already been uploaded',
+        document: existingDocument,
+      });
     }
 
     const doc = await Document.create({
@@ -26,6 +39,7 @@ router.post('/', upload.single('file'), async (req, res) => {
       filePath: req.file.path,
       mimeType: req.file.mimetype,
       size: req.file.size,
+      contentHash,
       status: 'uploaded',
     });
 
@@ -67,9 +81,27 @@ router.post('/', upload.single('file'), async (req, res) => {
       });
     }
   } catch (err) {
+    if (err.code === 11000 && err.keyPattern?.contentHash) {
+      return res.status(409).json({ error: 'This document has already been uploaded' });
+    }
     console.error('[POST /upload]', err.message);
     res.status(500).json({ error: 'Upload failed', details: err.message });
   }
 });
+
+async function hashFile(filePath) {
+  const fileBuffer = await fs.readFile(filePath);
+  return crypto.createHash('sha256').update(fileBuffer).digest('hex');
+}
+
+async function removeUploadedFile(filePath) {
+  try {
+    await fs.unlink(filePath);
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error('[upload] Failed to remove duplicate file:', err.message);
+    }
+  }
+}
 
 module.exports = router;
