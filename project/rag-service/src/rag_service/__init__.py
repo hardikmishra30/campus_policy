@@ -1,7 +1,13 @@
 from typing import Any
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from ingest.ingest_payload import ingest_from_payload
+from services.qa_service import answer_query
+
+
+load_dotenv()
 
 app = FastAPI(title="Campus Q&A RAG Service")
 
@@ -13,21 +19,15 @@ def health() -> dict[str, str]:
 
 @app.post("/ingest")
 def ingest(payload: dict[str, Any]) -> dict[str, Any]:
-	return {
-		"status": "accepted",
-		"documentId": payload.get("documentId"),
-		"message": "Document ingestion is not implemented yet.",
-	}
+	return ingest_from_payload(payload)
 
 
 
 @app.post("/retrieve_and_generate")
 def retrieve_and_generate(payload: dict[str, Any]) -> dict[str, Any]:
-	return {
-		"answer": "The RAG generation pipeline is not implemented yet.",
-		"citations": [],
-		"query": payload.get("query"),
-	}
+	query = payload.get("query")
+	filters = payload.get("filters") or {}
+	return answer_query(query, filters)
 
 
 def main() -> None:
