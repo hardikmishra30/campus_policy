@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { sendChatQuery } from '../api/client';
 
-const DOC_TYPE_OPTIONS = ['policy', 'placement', 'syllabus', 'circular'];
+const DOC_TYPE_OPTIONS = ['Policy', 'Placement', 'Syllabus', 'Circular'];
 const YEAR_OPTIONS = [2021, 2022, 2023, 2024, 2025, 2026];
 
 function FormattedAnswer({ text }) {
