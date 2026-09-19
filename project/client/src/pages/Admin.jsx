@@ -3,6 +3,8 @@ import { fetchDocuments, uploadDocument } from '../api/client';
 
 const DOC_TYPE_OPTIONS = ['policy', 'placement', 'syllabus', 'circular'];
 
+const formatDocType = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+
 export default function Admin() {
   const [documents, setDocuments] = useState([]);
   const [file, setFile] = useState(null);
@@ -59,11 +61,20 @@ export default function Admin() {
 
   return (
     <div className="page admin-page">
-      <h2>Admin: Upload Documents</h2>
+      <div className="page-heading">
+        <div>
+          <h1>Document library</h1>
+          <p className="heading-copy">Add the source material used by the campus knowledge desk.</p>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="upload-form">
+        <div className="upload-intro">
+          <div><span className="upload-symbol">+</span><div><strong>Upload a source document</strong><p>PDF files are processed and indexed for search.</p></div></div>
+          <span className="file-limit">PDF · 25 MB max</span>
+        </div>
         <div className="form-row">
-          <label>PDF File</label>
+          <label>File</label>
           <input
             type="file"
             accept="application/pdf"
@@ -86,7 +97,7 @@ export default function Admin() {
           <select value={docType} onChange={(e) => setDocType(e.target.value)}>
             {DOC_TYPE_OPTIONS.map((type) => (
               <option key={type} value={type}>
-                {type}
+                {formatDocType(type)}
               </option>
             ))}
           </select>
@@ -97,15 +108,15 @@ export default function Admin() {
           <input type="number" value={year} onChange={(e) => setYear(e.target.value)} />
         </div>
 
-        <button type="submit" disabled={uploading}>
-          {uploading ? 'Uploading...' : 'Upload'}
+        <button className="primary-button" type="submit" disabled={uploading}>
+          {uploading ? 'Indexing...' : 'Upload and index'}
         </button>
       </form>
 
       {message && <p className="success-text">{message}</p>}
       {error && <p className="error-text">{error}</p>}
 
-      <h3>Existing Documents</h3>
+      <div className="section-heading"><h2>Existing documents</h2></div>
       <table className="documents-table">
         <thead>
           <tr>
@@ -120,7 +131,7 @@ export default function Admin() {
           {documents.map((doc) => (
             <tr key={doc._id}>
               <td>{doc.title}</td>
-              <td>{doc.docType}</td>
+              <td>{formatDocType(doc.docType)}</td>
               <td>{doc.year}</td>
               <td>{doc.status}</td>
               <td>{new Date(doc.createdAt).toLocaleString()}</td>
