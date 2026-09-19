@@ -11,7 +11,7 @@ const Document = require('../models/Document');
 router.post('/', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'PDF file is required (field name: "file")' });
+      return res.status(400).json({ error: 'A supported document file is required (field name: "file")' });
     }
 
     const { title, docType, year } = req.body;

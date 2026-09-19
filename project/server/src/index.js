@@ -28,12 +28,12 @@ app.use((req, res) => {
 // Central error handler
 app.use((err, req, res, next) => {
   console.error('[error]', err.message);
-  const isUploadValidationError = err.code === 'LIMIT_FILE_SIZE' || err.message === 'Only PDF files are allowed';
+  const isUploadValidationError = err.code === 'LIMIT_FILE_SIZE' || /Only PDF, Excel, and DOC files are allowed|File size must not exceed 25MB/.test(err.message || '');
   const statusCode = isUploadValidationError ? 400 : 500;
   const error = isUploadValidationError
-    ? err.message === 'Only PDF files are allowed'
-      ? err.message
-      : 'File size must not exceed 25MB'
+    ? err.code === 'LIMIT_FILE_SIZE'
+      ? 'File size must not exceed 25MB'
+      : (err.message || 'Only PDF, Excel, and DOC files are allowed')
     : 'Internal server error';
   res.status(statusCode).json({ error, details: err.message });
 });

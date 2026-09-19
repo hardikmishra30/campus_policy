@@ -70,14 +70,14 @@ export default function Admin() {
 
       <form onSubmit={handleSubmit} className="upload-form">
         <div className="upload-intro">
-          <div><span className="upload-symbol">+</span><div><strong>Upload a source document</strong><p>PDF files are processed and indexed for search.</p></div></div>
-          <span className="file-limit">PDF · 25 MB max</span>
+          <div><span className="upload-symbol">+</span><div><strong>Upload a source document</strong><p>PDF, DOC, and Excel files are processed and indexed for search.</p></div></div>
+          <span className="file-limit">PDF / DOC / Excel · 25 MB max</span>
         </div>
         <div className="form-row">
           <label>File</label>
           <input
             type="file"
-            accept="application/pdf"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
             onChange={(e) => setFile(e.target.files[0])}
           />
         </div>

@@ -7,7 +7,7 @@ from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter 
 
 
-SUPPORTED_EXTENSIONS = {".pdf", ".csv", ".xls", ".xlsx"}
+SUPPORTED_EXTENSIONS = {".pdf", ".csv", ".xls", ".xlsx", ".doc", ".docx"}
 
 
 def load_document(
@@ -17,7 +17,7 @@ def load_document(
 	doc_type: str | None = None,
 	year: int | None = None,
 ) -> list[Document]:
-	"""Load a PDF, CSV, or Excel file into LangChain documents."""
+	"""Load a PDF, DOC, CSV, or Excel file into LangChain documents."""
 	path = Path(file_path)
 	extension = path.suffix.lower()
 
@@ -34,6 +34,9 @@ def load_document(
 		for document in documents:
 			document.metadata = {**metadata, **document.metadata}
 		return documents
+
+	if extension in {".doc", ".docx"}:
+		return _load_word_document(path, metadata)
 
 	if extension == ".csv":
 		return _load_csv(path, metadata)
@@ -79,6 +82,21 @@ def _base_metadata(
 	if year is not None:
 		metadata["year"] = year
 	return metadata
+
+
+def _load_word_document(path: Path, metadata: dict[str, Any]) -> list[Document]:
+	import fitz
+
+	doc = fitz.open(str(path))
+	documents: list[Document] = []
+	for page_index in range(doc.page_count):
+		page = doc[page_index]
+		text = page.get_text("text").strip()
+		if not text:
+			continue
+		documents.append(Document(page_content=text, metadata={**metadata, "page": page_index + 1}))
+	doc.close()
+	return documents
 
 
 def _load_csv(path: Path, metadata: dict[str, Any]) -> list[Document]:

@@ -16,11 +16,24 @@ const storage = multer.diskStorage({
   },
 });
 
+const allowedMimeTypes = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv',
+]);
+
+const allowedExtensions = new Set(['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv']);
+
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/pdf') {
+  const extension = path.extname(file.originalname).toLowerCase();
+
+  if (allowedMimeTypes.has(file.mimetype) || allowedExtensions.has(extension)) {
     cb(null, true);
   } else {
-    cb(new Error('Only PDF files are allowed'), false);
+    cb(new Error('Only PDF, Excel, and DOC files are allowed'), false);
   }
 };
 
